@@ -4,6 +4,7 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import java.util.HashMap;
 import java.util.Map;
@@ -140,6 +141,10 @@ public class TestExample {
                 .all();
     }
 
+
+    //command:
+    //npm install -g json-server
+    //json-server --watch db.json
     @Test
     public void test10(){
 
@@ -153,7 +158,32 @@ public class TestExample {
     }
 
     @Test
-    public void test11() {
+    public void test11(){
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("firstName", "Ola");
+        jsonObject.put("lastName", "Kowalska");
+        jsonObject.put("subjectId", "1");
+
+
+        baseURI = "http://localhost:3000/";
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Content-Type", "application/json")
+                .body(jsonObject.toJSONString())
+                .when()
+                .post("/users")
+                .then()
+                .statusCode(201)
+                .log()
+                .all();
+
+    }
+    @Test
+    public void test13() {
 
         baseURI = "http://localhost:3000/";
 
@@ -162,7 +192,7 @@ public class TestExample {
                 .statusCode(200)
                 .log()
                 .all()
-                .body("firstName", hasItems("Leszek","Marta"));
+                .body("firstName", hasItems("Ola"));
 
 //        Response response = RestAssured.get("http://localhost:3000/users");
 //        System.out.println(response.getBody().asString());
@@ -182,31 +212,6 @@ public class TestExample {
     }
 
     @Test
-    public void test13(){
-
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("firstName", "Ola");
-        jsonObject.put("lastName", "Kowalska");
-        jsonObject.put("subjectId", "1");
-
-        baseURI = "http://localhost:3000/";
-
-        given()
-                .contentType(ContentType.JSON)
-                .accept(ContentType.JSON)
-                .header("Content-Type", "application/json")
-                .body(jsonObject.toJSONString())
-                .when()
-                .post("/users")
-                .then()
-                .statusCode(201)
-                .log()
-                .all();
-
-    }
-
-    @Test
     public void test14(){
 
         JSONObject jsonObject = new JSONObject();
@@ -221,7 +226,7 @@ public class TestExample {
                 .header("Content-Type", "application/json")
                 .body(jsonObject.toJSONString())
                 .when()
-                .patch("/users/4")
+                .patch("/users/1")
                 .then()
                 .statusCode(200)
                 .log()
@@ -246,11 +251,116 @@ public class TestExample {
                 .header("Content-Type", "application/json")
                 .body(jsonObject.toJSONString())
                 .when()
-                .put("/users/4")
+                .put("/users/1")
                 .then()
                 .statusCode(200)
                 .log()
                 .all();
+
+    }
+
+    @Test
+    public void test16(){
+
+        baseURI = "http://localhost:3000/";
+
+        when()
+                .delete("/users/1")
+                .then()
+                .statusCode(200);
+    }
+
+    @DataProvider(name = "DataPost")
+    public Object[][] dataPost(){
+
+        Object[][] object = new Object[2][3];
+
+        object[0][0] = "Adam";
+        object[0][1] = "Kowalewski";
+        object[0][2] = 1;
+
+        object[1][0] = "Maria";
+        object[1][1] = "Konopnicka";
+        object[1][2] = 2;
+
+        object[1][0] = "Piotr";
+        object[1][1] = "Panda";
+        object[1][2] = 3;
+
+        return object;
+    }
+
+    @Test(dataProvider = "DataPost")
+    public void test17(String firstName, String lastName, int subjectId){
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("firstName", firstName);
+        jsonObject.put("lastName", lastName);
+        jsonObject.put("subjectId", subjectId);
+
+        baseURI = "http://localhost:3000/";
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Content-Type", "application/json")
+                .body(jsonObject.toJSONString())
+                .when()
+                .post("/users")
+                .then()
+                .statusCode(201)
+                .log()
+                .all();
+
+    }
+
+    @DataProvider(name = "DataPost2")
+    public Object[][] dataPost2(){
+
+        return new Object[][] {
+                {"Adam","Mickiewicz", 3},
+                {"Juliusz", "Słowacki", 5},
+                {"Leszek", "B", 6},
+        };
+    }
+
+    @Test(dataProvider = "DataPost2")
+    public void test18(String firstName, String lastName, int subjectId){
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("firstName", firstName);
+        jsonObject.put("lastName", lastName);
+        jsonObject.put("subjectId", subjectId);
+
+        baseURI = "http://localhost:3000/";
+
+        given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .header("Content-Type", "application/json")
+                .body(jsonObject.toJSONString())
+                .when()
+                .post("/users")
+                .then()
+                .statusCode(201)
+                .log()
+                .all();
+
+    }
+
+    @DataProvider(name = "DeleteData")
+    public Object[][] deleteData(){
+        return new Object[][] {
+                {"",1}
+        };
+    }
+    @Test(dataProvider = "DeleteData")
+    public void test19(String test, int userId){
+
+        baseURI = "http://localhost:3000/";
+        when().delete("/users/"+userId).then().statusCode(200);
 
     }
 
